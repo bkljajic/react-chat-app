@@ -1,6 +1,7 @@
-import Message from "../message/Message";
 import React, { useEffect, useRef } from "react";
-import "../ChatRoom.css";
+
+import Message from "../message/Message";
+import './MessageContainer.css'
 
 const MessageContainer = ({ messages }) => {
   const messageRef = useRef();
@@ -21,7 +22,7 @@ const MessageContainer = ({ messages }) => {
         {messages.map((message, i) => (
           <Message
             key={i}
-            ownership={...message}
+            {...message}
           />
         ))}
       </div>
