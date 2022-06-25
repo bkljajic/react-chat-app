@@ -29,6 +29,10 @@
     border-bottom-left-radius: 2px;
 }
 
+.think {
+    color: darkgrey;
+}
+
 @keyframes fadeIn {
     0% {
         opacity: 0;

@@ -14,6 +14,7 @@ const ChatRoom = ({ socket, room }) => {
 
   const commands = {
     "/nick": handleNickCommand,
+    "/think": handleThinkCommand
   };
 
   const handleNewMessageChange = (event) => {
@@ -28,6 +29,7 @@ const ChatRoom = ({ socket, room }) => {
       timestamp: Date.now(),
       room: room,
       id: uuidv4(),
+      think: false,
     };
     handleCommands(message);
     setNewMessage("");
@@ -51,6 +53,15 @@ const ChatRoom = ({ socket, room }) => {
         room: room,
         userId: socket.id,
       });
+    }
+  }
+
+  function handleThinkCommand(message) {
+    if (message.content.split(" ")[1] != null) {
+      message.think = true;
+      message.content = message.content.substring(message.content.indexOf(" ") + 1);
+      socket.emit("send_message", message);
+      setMessages((list) => [...list, message]);
     }
   }
 
