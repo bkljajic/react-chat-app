@@ -1,0 +1,19 @@
+.messages-container {
+    flex: 1;
+    min-height: 100px;
+    overflow: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    overflow-y: scroll;
+}
+
+.messages-container::-webkit-scrollbar {
+    display: none;
+}
+
+.messages-list {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
