@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { debounce } from "lodash";
+import debounce from "lodash.debounce";
 
 import MessageContainer from "../components/message-container/MessageContainer";
 import MessageTextArea from "../components/message-text-area/MessageTextArea";
@@ -26,12 +26,15 @@ const ChatRoom = ({ socket, room }) => {
     setNewMessage(event.target.value);
     debouncedEmitIsTyping();
   };
-
-  const debouncedEmitIsTyping = useMemo(() => debounce(emitIsTyping, 5000), []);
-
   const emitIsTyping = () => {
     socket.emit("is_typing", { room: room, is_typing: false });
   };
+
+  const debouncedEmitIsTyping = useMemo(
+    () => debounce(emitIsTyping, 1000),
+    []
+  );
+
 
   const handleSendMessage = () => {
     const message = {

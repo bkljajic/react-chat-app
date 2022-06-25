@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 
 import Message from "../message/Message";
 import './MessageContainer.css'
+import {replaceStringWithEmoji} from "../../utils/utils";
 
 const MessageContainer = ({ messages }) => {
   const messageRef = useRef();
@@ -23,6 +24,7 @@ const MessageContainer = ({ messages }) => {
           <Message
             key={i}
             {...message}
+            content={replaceStringWithEmoji(message.content)}
           />
         ))}
       </div>
