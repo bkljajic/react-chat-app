@@ -29,6 +29,11 @@ io.on("connection", (socket) => {
     socket.to(data.room).emit("receive_message", data);
   });
 
+  socket.on("send_nickname", function (data) {
+    socket.data.user = data.nickname;
+    socket.to(data.room).emit("receive_send_nickname", data.nickname);
+  });
+
   socket.on("disconnect", () => {
     socket.broadcast.emit("user disconnected", socket.id);
   });

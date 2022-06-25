@@ -10,6 +10,11 @@ import "./ChatRoom.css";
 const ChatRoom = ({ socket, room }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState([]);
+  const [chatWith, setChatWith] = React.useState("");
+
+  const commands = {
+    "/nick": handleNickCommand,
+  };
 
   const handleNewMessageChange = (event) => {
     setNewMessage(event.target.value);
@@ -24,10 +29,30 @@ const ChatRoom = ({ socket, room }) => {
       room: room,
       id: uuidv4(),
     };
-    socket.emit("send_message", message);
-    setMessages((list) => [...list, message]);
+    handleCommands(message);
     setNewMessage("");
   };
+
+  const handleCommands = (newMessage) => {
+    commands.hasOwnProperty(newMessage.content.split(" ")[0])
+      ? commands[newMessage.content.split(" ")[0]](newMessage)
+      : emitMessage(newMessage);
+  };
+
+  const emitMessage = (message) => {
+    socket.emit("send_message", message);
+    setMessages((list) => [...list, message]);
+  };
+
+  function handleNickCommand(message) {
+    if (message.content.split(" ")[1] != null) {
+      socket.emit("send_nickname", {
+        nickname: message.content.split(" ")[1],
+        room: room,
+        userId: socket.id,
+      });
+    }
+  }
 
   useEffect(() => {
     socket.off("receive_message").on("receive_message", (data) => {
@@ -36,11 +61,14 @@ const ChatRoom = ({ socket, room }) => {
         { ...data, ownMessage: socket.id == data.userId },
       ]);
     });
+    socket.on("receive_send_nickname", (data) => {
+      setChatWith(data);
+    });
   }, [socket]);
 
   return (
     <div className="chat-room-container">
-      <ChatHeader title={""} />
+      <ChatHeader title={chatWith} />
       <MessageContainer messages={messages} />
       <MessageTextArea
         message={newMessage}
