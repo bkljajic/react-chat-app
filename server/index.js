@@ -34,6 +34,10 @@ io.on("connection", (socket) => {
     socket.to(data.room).emit("receive_send_nickname", data.nickname);
   });
 
+  socket.on("delete_message", (data) => {
+    socket.to(data.room).emit("receive_delete_message", data.id);
+  });
+
   socket.on("disconnect", () => {
     socket.broadcast.emit("user disconnected", socket.id);
   });

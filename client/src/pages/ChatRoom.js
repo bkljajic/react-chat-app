@@ -14,7 +14,8 @@ const ChatRoom = ({ socket, room }) => {
 
   const commands = {
     "/nick": handleNickCommand,
-    "/think": handleThinkCommand
+    "/think": handleThinkCommand,
+    "/oops": handleOopsCommand,
   };
 
   const handleNewMessageChange = (event) => {
@@ -59,10 +60,28 @@ const ChatRoom = ({ socket, room }) => {
   function handleThinkCommand(message) {
     if (message.content.split(" ")[1] != null) {
       message.think = true;
-      message.content = message.content.substring(message.content.indexOf(" ") + 1);
+      message.content = message.content.substring(
+        message.content.indexOf(" ") + 1
+      );
       socket.emit("send_message", message);
       setMessages((list) => [...list, message]);
     }
+  }
+
+  function handleOopsCommand() {
+    let lastMessage = getLastMessage();
+    socket.emit("delete_message", {
+      room: lastMessage.room,
+      id: lastMessage.id,
+    });
+    setMessages((list) => list.filter((item) => item.id !== lastMessage.id));
+  }
+
+  function getLastMessage() {
+    return messages
+      .filter((message) => message.userId == socket.id)
+      .sort(messages.timestamp)
+      .pop();
   }
 
   useEffect(() => {
@@ -75,6 +94,11 @@ const ChatRoom = ({ socket, room }) => {
     socket.on("receive_send_nickname", (data) => {
       setChatWith(data);
     });
+    socket
+      .off("receive_delete_message")
+      .on("receive_delete_message", (data) => {
+        setMessages((list) => list.filter((item) => item.id !== data));
+      });
   }, [socket]);
 
   return (
