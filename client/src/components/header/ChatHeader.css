@@ -1,0 +1,11 @@
+.chat-header {
+    height: 50px;
+    justify-content: center;
+    align-items: center;
+    font-size: 25px;
+    font-weight: bold;
+    background: rgb(190,191,189);
+    background: linear-gradient(90deg, rgba(190 191 189 / 0%) 0%, rgba(107 144 86 / 67%) 100%);
+    border-top-left-radius: 5px;
+    display: flex;
+}
