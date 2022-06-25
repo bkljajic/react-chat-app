@@ -37,6 +37,11 @@
     opacity: 10%;
 }
 
+.highlight {
+    filter: brightness(90%);
+    font-size: 1.1em;
+}
+
 @keyframes fadeIn {
     0% {
         opacity: 0;

@@ -20,6 +20,7 @@ const ChatRoom = ({ socket, room }) => {
     "/think": handleThinkCommand,
     "/oops": handleOopsCommand,
     "/fadelast": handleFadelastCommand,
+    "/highlight": handleHighlightCommand,
   };
 
   const handleNewMessageChange = (event) => {
@@ -43,6 +44,7 @@ const ChatRoom = ({ socket, room }) => {
       id: uuidv4(),
       think: false,
       faded: false,
+      highlight: false,
     };
     handleCommands(message);
     setNewMessage("");
@@ -97,6 +99,13 @@ const ChatRoom = ({ socket, room }) => {
       id: lastMessage.id,
     });
     lastMessage.faded = true;
+  }
+
+  function handleHighlightCommand(message) {
+    message.highlight = true;
+    message.content = message.content.substring(message.content.indexOf(" ") + 1);
+    socket.emit("send_message", message);
+    setMessages((list) => [...list, message]);
   }
 
   function getLastMessage() {
