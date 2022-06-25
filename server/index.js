@@ -38,6 +38,10 @@ io.on("connection", (socket) => {
     socket.to(data.room).emit("receive_delete_message", data.id);
   });
 
+  socket.on("is_typing", (data) => {
+    socket.to(data.room).emit("receive_is_typing", data.is_typing);
+  });
+
   socket.on("disconnect", () => {
     socket.broadcast.emit("user disconnected", socket.id);
   });

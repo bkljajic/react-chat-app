@@ -1,16 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { debounce } from "lodash";
 
 import MessageContainer from "../components/message-container/MessageContainer";
 import MessageTextArea from "../components/message-text-area/MessageTextArea";
 import Button from "../components/button/Button";
 import ChatHeader from "../components/header/ChatHeader";
+import TypingIndicator from "../components/typing-indicator/TypingIndicator";
 import "./ChatRoom.css";
 
 const ChatRoom = ({ socket, room }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState([]);
   const [chatWith, setChatWith] = React.useState("");
+  const [isTyping, setIsTyping] = React.useState(false);
 
   const commands = {
     "/nick": handleNickCommand,
@@ -19,7 +22,15 @@ const ChatRoom = ({ socket, room }) => {
   };
 
   const handleNewMessageChange = (event) => {
+    !isTyping && socket.emit("is_typing", { room: room, is_typing: true });
     setNewMessage(event.target.value);
+    debouncedEmitIsTyping();
+  };
+
+  const debouncedEmitIsTyping = useMemo(() => debounce(emitIsTyping, 5000), []);
+
+  const emitIsTyping = () => {
+    socket.emit("is_typing", { room: room, is_typing: false });
   };
 
   const handleSendMessage = () => {
@@ -43,6 +54,7 @@ const ChatRoom = ({ socket, room }) => {
   };
 
   const emitMessage = (message) => {
+    emitIsTyping();
     socket.emit("send_message", message);
     setMessages((list) => [...list, message]);
   };
@@ -99,12 +111,16 @@ const ChatRoom = ({ socket, room }) => {
       .on("receive_delete_message", (data) => {
         setMessages((list) => list.filter((item) => item.id !== data));
       });
+    socket.on("receive_is_typing", (data) => {
+      setIsTyping(data);
+    });
   }, [socket]);
 
   return (
     <div className="chat-room-container">
       <ChatHeader title={chatWith} />
       <MessageContainer messages={messages} />
+      {isTyping && <TypingIndicator />}
       <MessageTextArea
         message={newMessage}
         handleMessageChange={handleNewMessageChange}
