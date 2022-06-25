@@ -33,6 +33,10 @@
     color: darkgrey;
 }
 
+.faded {
+    opacity: 10%;
+}
+
 @keyframes fadeIn {
     0% {
         opacity: 0;

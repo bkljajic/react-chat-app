@@ -19,6 +19,7 @@ const ChatRoom = ({ socket, room }) => {
     "/nick": handleNickCommand,
     "/think": handleThinkCommand,
     "/oops": handleOopsCommand,
+    "/fadelast": handleFadelastCommand,
   };
 
   const handleNewMessageChange = (event) => {
@@ -30,11 +31,7 @@ const ChatRoom = ({ socket, room }) => {
     socket.emit("is_typing", { room: room, is_typing: false });
   };
 
-  const debouncedEmitIsTyping = useMemo(
-    () => debounce(emitIsTyping, 1000),
-    []
-  );
-
+  const debouncedEmitIsTyping = useMemo(() => debounce(emitIsTyping, 1000), []);
 
   const handleSendMessage = () => {
     const message = {
@@ -45,6 +42,7 @@ const ChatRoom = ({ socket, room }) => {
       room: room,
       id: uuidv4(),
       think: false,
+      faded: false,
     };
     handleCommands(message);
     setNewMessage("");
@@ -92,6 +90,15 @@ const ChatRoom = ({ socket, room }) => {
     setMessages((list) => list.filter((item) => item.id !== lastMessage.id));
   }
 
+  function handleFadelastCommand() {
+    let lastMessage = getLastMessage();
+    socket.emit("fade_last_message", {
+      room: lastMessage.room,
+      id: lastMessage.id,
+    });
+    lastMessage.faded = true;
+  }
+
   function getLastMessage() {
     return messages
       .filter((message) => message.userId == socket.id)
@@ -117,6 +124,15 @@ const ChatRoom = ({ socket, room }) => {
     socket.on("receive_is_typing", (data) => {
       setIsTyping(data);
     });
+    socket
+      .off("receive_fade_last_message")
+      .on("receive_fade_last_message", (data) => {
+        setMessages((list) => {
+          return list.map((message) =>
+            message.id == data ? { ...message, faded: true } : message
+          );
+        });
+      });
   }, [socket]);
 
   return (
