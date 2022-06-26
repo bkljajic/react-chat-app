@@ -1,33 +1,29 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
+import { Virtuoso } from "react-virtuoso";
 
 import Message from "../message/Message";
-import './MessageContainer.css'
-import {replaceStringWithEmoji} from "../../utils/utils";
+import { replaceStringWithEmoji } from "../../utils/utils";
+import MessageItem from "./MessageItem";
+import "./MessageContainer.css";
 
 const MessageContainer = ({ messages }) => {
-  const messageRef = useRef();
-
-  useEffect(() => {
-    if (messageRef.current) {
-      messageRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-        inline: "nearest",
-      });
-    }
-  }, [messages]);
-
   return (
     <div className="messages-container">
-      <div className="messages-list" ref={messageRef}>
-        {messages.map((message, i) => (
+      <Virtuoso
+        components={{ Item: MessageItem }}
+        className={"virtuoso-container"}
+        data={messages}
+        totalCount={messages.length}
+        initialTopMostItemIndex={messages.length - 1}
+        followOutput
+        itemContent={(index, message) => (
           <Message
-            key={i}
-            {...message}
-            content={replaceStringWithEmoji(message.content)}
+            key={index}
+            {...messages[index]}
+            content={replaceStringWithEmoji(message?.content)}
           />
-        ))}
-      </div>
+        )}
+      />
     </div>
   );
 };
