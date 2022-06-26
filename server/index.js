@@ -11,18 +11,18 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
+let users = [];
+
 io.on("connection", (socket) => {
-  const users = [];
-  for (let [id, socket] of io.of("/").sockets) {
-    users.push({
-      userID: id,
-    });
-  }
-  console.log('connected')
 
   socket.on("join_room", (data) => {
-    socket.join(data);
-    console.log(`User with ID: ${socket.id} joined room: ${data}`);
+    if (users.length < 2) {
+      socket.join(data);
+      users.push({ userId: socket.id });
+      socket.emit("receive_join_room", { join: true, users: users });
+    } else {
+      socket.emit("receive_join_room", { join: false });
+    }
   });
 
   socket.on("send_message", (data) => {
@@ -31,6 +31,9 @@ io.on("connection", (socket) => {
 
   socket.on("send_nickname", function (data) {
     socket.data.user = data.nickname;
+    users = users.map((user) =>
+      user.userId === data.userId ? { ...user, nickname: data.nickname } : user
+    );
     socket.to(data.room).emit("receive_send_nickname", data.nickname);
   });
 
@@ -52,6 +55,7 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     socket.broadcast.emit("user disconnected", socket.id);
+    users = users.filter((user) => user.userId != socket.id);
   });
 });
 
