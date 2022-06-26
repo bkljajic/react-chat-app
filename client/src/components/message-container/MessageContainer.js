@@ -5,10 +5,19 @@ import Message from "../message/Message";
 import { replaceStringWithEmoji } from "../../utils/utils";
 import MessageItem from "./MessageItem";
 import "./MessageContainer.css";
+import Timer from "../timer/Timer";
 
-const MessageContainer = ({ messages }) => {
+const MessageContainer = ({ messages, countdown, onCountdownComplete }) => {
   return (
     <div className="messages-container">
+      {countdown != null ? (
+        <Timer
+          time={countdown.time}
+          onComplete={() => {
+            onCountdownComplete();
+          }}
+        />
+      ) : (
       <Virtuoso
         components={{ Item: MessageItem }}
         className={"virtuoso-container"}
@@ -23,7 +32,7 @@ const MessageContainer = ({ messages }) => {
             content={replaceStringWithEmoji(message?.content)}
           />
         )}
-      />
+      />) }
     </div>
   );
 };

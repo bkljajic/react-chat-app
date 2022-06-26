@@ -14,6 +14,7 @@ const ChatRoom = ({ socket, room }) => {
   const [newMessage, setNewMessage] = useState([]);
   const [chatWith, setChatWith] = React.useState("");
   const [isTyping, setIsTyping] = React.useState(false);
+  const [countdown, setCountdown] = React.useState(null);
 
   const commands = {
     "/nick": handleNickCommand,
@@ -21,6 +22,7 @@ const ChatRoom = ({ socket, room }) => {
     "/oops": handleOopsCommand,
     "/fadelast": handleFadelastCommand,
     "/highlight": handleHighlightCommand,
+    "/countdown": handleCoundtownCommand,
   };
 
   const handleNewMessageChange = (event) => {
@@ -103,7 +105,9 @@ const ChatRoom = ({ socket, room }) => {
 
   function handleHighlightCommand(message) {
     message.highlight = true;
-    message.content = message.content.substring(message.content.indexOf(" ") + 1);
+    message.content = message.content.substring(
+      message.content.indexOf(" ") + 1
+    );
     socket.emit("send_message", message);
     setMessages((list) => [...list, message]);
   }
@@ -114,6 +118,34 @@ const ChatRoom = ({ socket, room }) => {
       .sort(messages.timestamp)
       .pop();
   }
+
+  function handleCoundtownCommand(message) {
+    console.log("aajde");
+    if (
+      message.content.split(" ")[1] != null &&
+      !isNaN(message.content.split(" ")[1]) &&
+      message.content.split(" ")[2] != null
+    ) {
+      socket.emit("countdown", {
+        room: message.room,
+        time: message.content.split(" ")[1],
+        url: message.content.split(" ")[2],
+      });
+    }
+  }
+
+  const onCountdownComplete = () => {
+    openLinkInNewWindow(countdown.url);
+    setCountdown();
+  };
+
+  const openLinkInNewWindow = (url) => {
+    window.open(
+      url,
+      null,
+      "location=yes,height=570,width=520,scrollbars=yes,status=yes"
+    );
+  };
 
   useEffect(() => {
     socket.off("receive_message").on("receive_message", (data) => {
@@ -142,12 +174,19 @@ const ChatRoom = ({ socket, room }) => {
           );
         });
       });
+    socket.on("receive_countdown", (data) => {
+      setCountdown({ time: parseInt(data.time), url: data.url });
+    });
   }, [socket]);
 
   return (
     <div className="chat-room-container">
       <ChatHeader title={chatWith} />
-      <MessageContainer messages={messages} />
+      <MessageContainer
+        messages={messages}
+        countdown={countdown}
+        onCountdownComplete={onCountdownComplete}
+      />
       {isTyping && <TypingIndicator />}
       <MessageTextArea
         message={newMessage}

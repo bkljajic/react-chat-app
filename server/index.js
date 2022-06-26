@@ -42,8 +42,12 @@ io.on("connection", (socket) => {
     socket.to(data.room).emit("receive_is_typing", data.is_typing);
   });
 
-   socket.on("fade_last_message", (data) => {
+  socket.on("fade_last_message", (data) => {
     socket.to(data.room).emit("receive_fade_last_message", data.id);
+  });
+
+  socket.on("countdown", (data) => {
+    socket.to(data.room).emit("receive_countdown", data);
   });
 
   socket.on("disconnect", () => {
