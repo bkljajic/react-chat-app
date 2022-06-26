@@ -26,7 +26,7 @@ const ChatRoom = ({ socket, room }) => {
   };
 
   const handleNewMessageChange = (event) => {
-    !isTyping && socket.emit("is_typing", { room: room, is_typing: true });
+    socket.emit("is_typing", { room: room, is_typing: true });
     setNewMessage(event.target.value);
     debouncedEmitIsTyping();
   };
@@ -176,6 +176,12 @@ const ChatRoom = ({ socket, room }) => {
       });
     socket.on("receive_countdown", (data) => {
       setCountdown({ time: parseInt(data.time), url: data.url });
+    });
+    socket.on("receive_join_room", function (data) {
+      if (data.users) {
+        let user = data.users.filter((user) => user.userId !== socket.id);
+        user[0]?.nickname && setChatWith(user[0]?.nickname);
+      }
     });
   }, [socket]);
 
